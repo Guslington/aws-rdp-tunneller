@@ -40,13 +40,14 @@ AWS Profile (optional)
 ## Supports
 
 OSX only
+Microsoft Remote Desktop -v 8.0.18
 
 ## Required
 
 ### Gems
 ```bash
 gem install aws-sdk
-gem install cfpropertylist
+gem install CFPropertyList
 ```
 
 ## Backup your existing RDP config as this will replace it!
