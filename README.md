@@ -1,9 +1,9 @@
 # AWS RDP Tunneller
 
-Gets all windows instances for an environment in AWS
-Gets the windows password and puts them into KeyChain
-Setups ssh tunnel sessions through the public bastion instance
-Creates RDP configs and places them into Microsoft Remote Desktop
+* Gets all windows instances for an environment in AWS
+* Gets the windows password and puts them into KeyChain
+* Setups ssh tunnel sessions through the public bastion instance
+* Creates RDP configs and places them into Microsoft Remote Desktop
 
 ## Usage
 
