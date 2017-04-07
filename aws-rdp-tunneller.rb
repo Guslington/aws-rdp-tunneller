@@ -63,7 +63,7 @@ end
 
 def add_remote_desktop_client(i)
   $data["bookmarkorder.ids"] << "{#{$servers[i][:uuid]}}"
-  $data["bookmarks.bookmark.{#{$servers[i][:uuid]}}.label"] = "#{$servers[i][:instance_id]}"
+  $data["bookmarks.bookmark.{#{$servers[i][:uuid]}}.label"] = "#{$servers[i][:instance_id]} - #{$servers[i][:name]}"
   $data["bookmarks.bookmark.{#{$servers[i][:uuid]}}.hostname"] = "localhost:#{$servers[i][:port]}"
   $data["bookmarks.bookmark.{#{$servers[i][:uuid]}}.username"] = "Administrator"
   $data["bookmarks.bookmark.{#{$servers[i][:uuid]}}.resolution"] = "@Size(0 0)"
@@ -89,9 +89,15 @@ def setup_ssh_tunnel_bash(i)
 end
 
 def cleanup
-  $ssh_pids.each { |pid| Process.kill("TERM", pid) }
-  File.delete($plist_file)
+  $ssh_pids.each do |pid|
+    begin
+      Process.kill("TERM", pid)
+    rescue Errno::ESRCH => e
+      puts "DEBUG: SSH PID #{pid} | #{e}"
+    end
+  end
   $servers.each_with_index { |server,index| delete_password_in_keychain(index) }
+  File.delete($plist_file)
   puts "DEBUG: MRD PID #{$mrd_pid}"
 end
 
@@ -104,6 +110,8 @@ until ARGV.empty?
       $environment_name = ARGV.shift
     when '-k', '--private-key'
       $privatekey = ARGV.shift
+    when '-p', '--aws-profile'
+      $profile = ARGV.shift
     when '-u', '--ssh-user'
       $sshuser = ARGV.shift
     end
@@ -122,7 +130,13 @@ else
   $sshuser = ""
 end
 
-$ec2 = Aws::EC2::Client.new(region: $region)
+if !$profile
+  $ec2 = Aws::EC2::Client.new(region: $region)
+else
+  creds = Aws::SharedCredentials.new(profile_name: $profile)
+  $ec2 = Aws::EC2::Client.new(region: $region, credentials: creds)
+end
+
 $loggedInUser = ENV['USER']
 $plist_file = "/Users/#{$loggedInUser}/Library/Containers/com.microsoft.rdc.mac/Data/Library/Preferences/com.microsoft.rdc.mac.plist"
 $data = Hash.new
