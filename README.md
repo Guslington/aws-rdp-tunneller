@@ -8,7 +8,7 @@
 ## Usage
 
 ```bash
-./aws-rdp-tunnller.rb -r us-west-2 -e dev -k devkey.pem
+./aws-rdp-tunneller.rb -r us-west-2 -e dev -k devkey.pem
 ```
 
 ### Options
