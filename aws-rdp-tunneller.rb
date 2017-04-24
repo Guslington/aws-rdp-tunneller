@@ -147,12 +147,14 @@ $plist_file = "/Users/#{$loggedInUser}/Library/Containers/com.microsoft.rdc.mac/
 $data = Hash.new
 $ssh_pids = Array.new
 
-puts "===============\n   Welcome   \n===============\n"
+puts "=================================\n   Welcome to AWS-RDP-Tunneller  \n=================================\n"
+puts "Type [q] to quit and cleanup\nNOTE: If script is cancelled it may leave open ssh connections and build up keys in your keychain **\n\n"
 puts "INFO: Getting list of windows servers"
 $servers = get_list_of_windows_servers
 puts "INFO: Found #{$servers.count}"
 puts "INFO: Getting passwords"
 get_windows_passwords
+puts "INFO: Retrieved #{$servers.count} passwords"
 puts "INFO: Adding servers into Microsoft Remote Desktop"
 create_plist
 puts "INFO: Adding passwords into keychain"
@@ -161,18 +163,16 @@ $servers.each_with_index { |server,index| add_password_to_keychain(index) }
 puts "INFO: Getting bastion address"
 $bastion = get_bastion
 
-puts "INFO: Setting up ssh sessions"
-$servers.each_with_index { |server,index| setup_ssh_tunnel_bash(index) }
-
 puts "INFO: Starting Microsoft Remote Desktop"
 $mrd_pid = spawn "open -na '/Applications/Microsoft Remote Desktop.app/Contents/MacOS/Microsoft Remote Desktop'"
 Process.detach($mrd_pid)
 
-puts "\n\n======\n Menu \n======"
+puts "INFO: Setting up ssh sessions"
+$servers.each_with_index { |server,index| setup_ssh_tunnel_bash(index) }
+
+puts "\n"
 
 loop do
-  puts "[Q]uit"
-  puts "Select Option: "
   case gets.strip
   when "Q","q"
     puts "INFO: Cleaning up"
@@ -180,6 +180,6 @@ loop do
     puts "INFO: Exiting"
     exit 0
   else
-    puts "option not available"
+    puts "Type [q] to quit"
   end
 end
