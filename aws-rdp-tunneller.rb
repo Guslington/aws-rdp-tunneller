@@ -43,7 +43,12 @@ def get_windows_passwords
   $servers.each do |key,value|
     resp = $ec2.get_password_data({ instance_id: value[:instance_id] })
     private_key = OpenSSL::PKey::RSA.new(File.read($privatekey))
-    $servers[key][:password] = private_key.private_decrypt(Base64.decode64(resp.password_data))
+    if resp.password_data != ""
+      $servers[key][:password] = private_key.private_decrypt(Base64.decode64(resp.password_data))
+    else
+      puts "WARN: Unable to retrieve password for #{value[:name]} #{value[:instance_id]}"
+      $servers.delete(key)
+    end
   end
 end
 
