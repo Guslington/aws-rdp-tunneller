@@ -54,7 +54,7 @@ end
 
 def create_plist
   $data["bookmarkorder.ids"] = []
-  $servers.each_with_index { |server,index| add_remote_desktop_client(index) if $servers.key?(index) }
+  $servers.each { |key,server| add_remote_desktop_client(key) }
   $data["preferences.resolutions"] = [ "@Size(640 480)", "@Size(800 600)", "@Size(1024 768)", "@Size(1280 720)", "@Size(1280 1024)", "@Size(1600 900)", "@Size(1920 1080)", "@Size(1920 1200)" ]
   $data["show_whats_new_dialog"] = 0
   $data["stored_version_number"] = "8.0.26163"
@@ -101,7 +101,7 @@ def cleanup
       puts "DEBUG: SSH PID #{pid} | #{e}"
     end
   end
-  $servers.each_with_index { |server,index| delete_password_in_keychain(index) if $servers.key?(index) }
+  $servers.each { |key,server| delete_password_in_keychain(key) }
   File.delete($plist_file)
   puts "DEBUG: MRD PID #{$mrd_pid}"
 end
@@ -158,7 +158,7 @@ puts "INFO: Retrieved #{$servers.count} passwords"
 puts "INFO: Adding servers into Microsoft Remote Desktop"
 create_plist
 puts "INFO: Adding passwords into keychain"
-$servers.each_with_index { |server,index| add_password_to_keychain(index) if $servers.key?(index) }
+$servers.each { |key,server| add_password_to_keychain(key) }
 
 puts "INFO: Getting bastion address"
 $bastion = get_bastion
@@ -168,7 +168,7 @@ $mrd_pid = spawn "open -na '/Applications/Microsoft Remote Desktop.app/Contents/
 Process.detach($mrd_pid)
 
 puts "INFO: Setting up ssh sessions"
-$servers.each_with_index { |server,index| setup_ssh_tunnel_bash(index) if $servers.key?(index) }
+$servers.each { |key,server| setup_ssh_tunnel_bash(key) }
 
 puts "\n"
 
