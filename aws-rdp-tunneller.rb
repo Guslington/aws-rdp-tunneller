@@ -5,6 +5,25 @@ require 'securerandom'
 require 'cfpropertylist'
 require 'openssl'
 require 'base64'
+require 'socket'
+require 'timeout'
+
+def is_port_available?(port, ip='0.0.0.0')
+  begin
+    Timeout::timeout(1) do
+      begin
+        s = TCPSocket.new(ip, port)
+        s.close
+        return true
+      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+        return false
+      end
+    end
+  rescue Timeout::Error
+  end
+
+  return false
+end
 
 def get_list_of_windows_servers
   servers = Hash.new
@@ -102,8 +121,10 @@ def cleanup
     end
   end
   $servers.each { |key,server| delete_password_in_keychain(key) }
+  puts "DEBUG: Closing Microsoft Remote Desktop"
+  %x(osascript -e 'quit app "Microsoft Remote Desktop"')
+  puts "DEBUG: Deleting plist"
   File.delete($plist_file)
-  puts "DEBUG: MRD PID #{$mrd_pid}"
 end
 
 until ARGV.empty?
