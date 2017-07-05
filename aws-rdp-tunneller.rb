@@ -52,9 +52,14 @@ def get_bastion
       [
         { name: 'tag:Environment', values: [$environment_name] },
         { name: 'instance-state-name', values: ['running'] },
-        { name: 'tag:Name', values: ["#{$environment_name}-bastion-xx"] },
+        { name: 'tag:Name', values: [$bastion_name] },
       ]
   )
+  if resp.reservations.size() == 0
+    STDERR.puts("Could not find bastion instance matched by Name=#{$bastion_name},Environment=#{$environment_name}")
+    STDOUT.puts("Specify bastion isntance name using -bn <name> or --bastion-name <name>")
+    exit -1
+  end
   resp.reservations[0].instances[0].public_dns_name
 end
 
@@ -127,6 +132,9 @@ def cleanup
   File.delete($plist_file)
 end
 
+# default options
+$bastion_name = ''
+
 until ARGV.empty?
   if ARGV.first.start_with?('-')
     case ARGV.shift
@@ -140,11 +148,15 @@ until ARGV.empty?
       $profile = ARGV.shift
     when '-u', '--ssh-user'
       $sshuser = ARGV.shift
+    when '-bn','--bastion-name'
+      $bastion_name = ARGV.shift
     end
   else
     ARGV.shift
   end
 end
+
+$bastion_name = "#{$environment_name}-bastion-xx" unless $bastion_name != ''
 
 if !$region || !$environment_name || !$privatekey
   abort "ERROR: one or more parameters not supplied\nRequired `--environment-name`, `--region`, `--private-key`\nOptional `--ssh-user`"

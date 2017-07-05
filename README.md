@@ -5,6 +5,14 @@
 * Setups ssh tunnel sessions through the public bastion instance
 * Creates RDP configs and places them into Microsoft Remote Desktop
 
+## Dependencies
+
+Use bundler to install dependencies within Gemfile
+
+```
+bundle install
+```
+
 ## Usage
 
 ```bash
@@ -35,6 +43,11 @@ SSH user used to connect to the bastion to setup the tunnel. (optional) if defin
 AWS Profile (optional)
 ```bash
 -p --profile dev
+```
+
+Name of bastion host (optional, defaults to "bastion-xx")
+```bash
+-bm --bastion-name
 ```
 
 ## Supports
