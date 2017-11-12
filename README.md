@@ -45,9 +45,9 @@ AWS Profile (optional)
 -p --profile dev
 ```
 
-Name of bastion host (optional, defaults to "bastion-xx")
+Name of bastion host (optional, defaults to "<environment_name>-bastion-xx")
 ```bash
--bm --bastion-name
+-bn --bastion-name
 ```
 
 ## Supports
