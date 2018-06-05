@@ -27,14 +27,12 @@ end
 
 def get_list_of_windows_servers
   servers = Hash.new
-  resp = $ec2.describe_instances(
-    filters:
-      [
-        { name: 'tag:Environment', values: [$environment_name] },
-        { name: 'instance-state-name', values: ['running'] },
-        { name: 'platform', values: ['windows'] },
-      ]
-  )
+  filters = []
+  filters << { name: 'tag:Environment', values: [$environment_name] }
+  filters << { name: 'instance-state-name', values: ['running'] }
+  filters << { name: 'platform', values: ['windows'] }
+  filters << { name: 'tag:Role', values: ["*#{$role}*"] } if $role != ''
+  resp = $ec2.describe_instances(filters: filters)
   resp.reservations.each_with_index do |res,index|
     servers[index] = Hash.new
     res.instances.each do |i|
@@ -103,7 +101,7 @@ def add_remote_desktop_client(i)
 end
 
 def add_password_to_keychain(i)
-  %x(security add-internet-password -l #{$servers[i][:instance_id]} -a Administrator -s "localhost:#{$servers[i][:port]}" -w "#{$servers[i][:password].gsub('$','\$')}" -p "{#{$servers[i][:uuid]}}" -T "/Applications/Microsoft Remote Desktop.app" /Users/#{$loggedInUser}/Library/Keychains/login.keychain)
+  %x(security add-internet-password -l #{$servers[i][:instance_id]} -a Administrator -s "localhost:#{$servers[i][:port]}" -w "#{$servers[i][:password].gsub('$','\$')}" -p "{#{$servers[i][:uuid]}}" -T "/Applications/Microsoft Remote Desktop.app")
 end
 
 def delete_password_in_keychain(i)
@@ -134,6 +132,7 @@ end
 
 # default options
 $bastion_name = ''
+$role = ''
 
 until ARGV.empty?
   if ARGV.first.start_with?('-')
@@ -150,6 +149,8 @@ until ARGV.empty?
       $sshuser = ARGV.shift
     when '-bn','--bastion-name'
       $bastion_name = ARGV.shift
+    when '-rl','--role'
+      $role = ARGV.shift
     end
   else
     ARGV.shift
