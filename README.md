@@ -50,6 +50,11 @@ Name of bastion host (optional, defaults to "<environment_name>-bastion-xx")
 -bn --bastion-name
 ```
 
+Get instance with role tag like `*value*` 
+```bash
+-rl --role
+```
+
 ## Supports
 
 OSX only
